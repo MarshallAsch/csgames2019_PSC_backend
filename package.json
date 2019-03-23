@@ -3,32 +3,26 @@
     "version": "1.0.0",
     "description": "",
     "scripts": {
-        "start": "cross-env NODE_ENV=development node ./build/app.js",
-        "start-watch": "cross-env NODE_ENV=development nodemon",
-        "build": "tsc && cpy src/log4js.json build/ && cpy frontend/**/* build/  --parents",
-        "postinstall": "npm run build",
-        "test": "nyc mocha --exit --ui tdd src/**/*.spec.ts",
-        "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov",
-        "test:watch": "mocha -r ts-node/register src/**/*.spec.ts -w"
+        "start": "nodemon start app.js",
+        "test": "nyc mocha --exit --ui tdd src/**/*.js"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
         "bcrypt": "^3.0.5",
+        "body-parser": "^1.18.3",
         "chai-as-promised": "^7.1.1",
         "dotenv": "^6.0.0",
         "express": "^4.16.3",
         "jsonwebtoken": "^8.5.1",
         "mongodb": "^3.1.6",
         "mongoose": "^5.4.19",
-        "pbkdf2": "^3.0.16",
         "reflect-metadata": "^0.1.12",
         "request": "^2.88.0",
         "request-promise": "^4.2.2",
+        "rfr": "^1.2.3",
         "supertest": "^4.0.2",
-        "typescript": "^3.0.3",
-        "uuid": "^3.3.2",
-        "cross-env": "^5.2.0"
+        "uuid": "^3.3.2"
     },
     "devDependencies": {
         "@types/chai": "^4.1.4",
@@ -48,9 +42,7 @@
         "cpy-cli": "^2.0.0",
         "mocha": "^5.2.0",
         "nodemon": "^1.18.10",
-        "nyc": "^13.3.0",
-        "ts-node": "^7.0.1",
-        "typemoq": "^2.1.0"
+        "nyc": "^13.3.0"
     },
     "nyc": {
         "exclude": [

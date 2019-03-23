@@ -1,10 +1,10 @@
 {
-    "watch": [
-        "src"
-    ],
-    "ext": "ts",
     "ignore": [
-        "src/**/*.spec.ts"
+        "doc/*",
+        "jsdoc/*",
+        "uploads/*",
+        "test/*",
+        "*.md"
     ],
-    "exec": "ts-node src/app.ts"
+    "verbose": true
 }
