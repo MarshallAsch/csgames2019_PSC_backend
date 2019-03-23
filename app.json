@@ -1,0 +1,22 @@
+{
+    "name": "Mycspace - TEAM NAME",
+    "repository": "https://github.com/Aboisier/cs2019-Black-Perl",
+    "scripts": {},
+    "env": {
+        "FRONT_END_ORIGIN": "*"
+    },
+    "addons": [
+        "mongolab:sandbox"
+    ],
+    "buildpacks": [
+        {
+            "url": "heroku/nodejs"
+        }
+    ],
+    "formation": {
+        "web": {
+            "quantity": 1,
+            "size": "free"
+        }
+    }
+}

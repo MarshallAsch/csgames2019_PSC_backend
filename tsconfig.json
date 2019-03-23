@@ -1,0 +1,42 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "lib": [
+            "es6"
+        ],
+        "rootDir": "./src/",
+        "outDir": "./build/",
+        "module": "commonjs",
+        "declaration": true,
+        "noImplicitAny": false,
+        "removeComments": true,
+        "experimentalDecorators": true,
+        "moduleResolution": "node",
+        "emitDecoratorMetadata": true,
+        "sourceMap": true,
+        "inlineSources": true,
+        "baseUrl": ".",
+        "types": [
+            "reflect-metadata",
+            "mocha",
+            "chai",
+            "typemoq"
+        ],
+        "paths": {
+            "*": [
+                "*",
+                "./src/@types_local/*"
+            ]
+        },
+        "typeRoots": [
+            "./node_modules/@types",
+            "./src/@types_local"
+        ]
+    },
+    "include": [
+        "src/**/*.ts",
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
