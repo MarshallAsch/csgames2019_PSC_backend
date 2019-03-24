@@ -10,6 +10,7 @@ const source = require("rfr");
 
 const Account = source("./src/models/Accounts");
 const Profile = source("./src/models/Profile");
+const Job = source("./src/models/JobPosting");
 
 
 
@@ -46,127 +47,127 @@ function auth(req, res, next) {
     });
 }
 
-    router.post("/auth/signup", ((req, res) => {
+router.post("/api/v1/auth/signup", ((req, res) => {
 
-        // check for missing params
+    // check for missing params
 
-        if (!req.body.email) {
-            return res.status(400).json({"message": "missing email"});
-        }
+    if (!req.body.email) {
+        return res.status(400).json({"message": "missing email"});
+    }
 
-        if (!req.body.first_name) {
-            return res.status(400).json({"message": "missing first name"});
-        }
+    if (!req.body.first_name) {
+        return res.status(400).json({"message": "missing first name"});
+    }
 
-        if (!req.body.last_name) {
-            return res.status(400).json({"message": "missing last name"});
-        }
+    if (!req.body.last_name) {
+        return res.status(400).json({"message": "missing last name"});
+    }
 
-        if (!req.body.password) {
-            return res.status(400).json({"message": "missing password"});
-        }
+    if (!req.body.password) {
+        return res.status(400).json({"message": "missing password"});
+    }
 
-        if (!req.body.phone_number) {
-            return res.status(400).json({"message": "missing password"});
-        }
+    if (!req.body.phone_number) {
+        return res.status(400).json({"message": "missing password"});
+    }
 
-        Account.findOne({
-            email: req.body.email,
-        }).then(foundUser => {
+    Account.findOne({
+        email: req.body.email,
+    }).then(foundUser => {
 
-            if (foundUser) {
-                return res.status(500).json({"message": "email already in use"});
-            } else {
-                bcrypt.genSalt(10, function (err, salt) {
-                    bcrypt.hash(req.body.password, salt, function (err, hash) {
-                        // Store hash in your password DB.
+        if (foundUser) {
+            return res.status(500).json({"message": "email already in use"});
+        } else {
+            bcrypt.genSalt(10, function (err, salt) {
+                bcrypt.hash(req.body.password, salt, function (err, hash) {
+                    // Store hash in your password DB.
 
-                        var usr = new Account({
-                            userId: uuidv4(),
-                            email: req.body.email,
-                            passwd_hash: hash,
-                            first_name: req.body.first_name,
-                            last_name: req.body.last_name,
-                            address: req.body.address,
-                            phone_number: req.body.phone_number,
-                        });
+                    var usr = new Account({
+                        userId: uuidv4(),
+                        email: req.body.email,
+                        passwd_hash: hash,
+                        first_name: req.body.first_name,
+                        last_name: req.body.last_name,
+                        address: req.body.address,
+                        phone_number: req.body.phone_number,
+                    });
 
-                        usr.save().then(user => {
-                            res.status(201).json({"message": "success"});
-                        }).catch(err => {
-                            res.status(500).json({"message": err});
-                        });
+                    usr.save().then(user => {
+                        res.status(201).json({"message": "success"});
+                    }).catch(err => {
+                        res.status(500).json({"message": err});
                     });
                 });
-            }
-        }).catch(err => {
-            return res.status(500).json(err);
-        });
-    }));
-
-    router.post("/auth/login", ((req, res) => {
-
-        // check for missing params
-
-        if (!req.body.email) {
-            return res.status(400).json({"message": "missing email"});
+            });
         }
+    }).catch(err => {
+        return res.status(500).json(err);
+    });
+}));
 
-        if (!req.body.password) {
-            return res.status(400).json({"message": "missing password"});
+router.post("/oauth/token", ((req, res) => {
+
+    // check for missing params
+
+    if (!req.body.username) {
+        return res.status(400).json({"message": "missing email"});
+    }
+
+    if (!req.body.password) {
+        return res.status(400).json({"message": "missing password"});
+    }
+
+    Account.findOne({
+        email: req.body.username,
+    }).then((foundUser) => {
+
+        if (foundUser) {
+
+            bcrypt.compare(req.body.password, foundUser.passwd_hash, function(err, passMatch) {
+
+                if (passMatch) {
+                    var payload = {
+                        userId: foundUser.userId,
+                        email: foundUser.email,
+                        fullName: foundUser.fullName,
+                    };
+                    var token = jwt.sign(payload, SECRET);
+
+                    return res.status(200).json({"acccessToken": token});
+                } else {
+                    return res.status(403).json({"message": "access denied"});
+                }
+            });
+        } else {
+            return res.status(403).json({"message": "access denied"});
         }
+    }).catch(err => {
+        return res.status(500).json(err);
+    });
 
-        Account.findOne({
-            email: req.body.email,
-        }).then((foundUser) => {
-
-            if (foundUser) {
-
-                bcrypt.compare(req.body.password, foundUser.passwd_hash, function(err, passMatch) {
-
-                    if (passMatch) {
-                        var payload = {
-                            userId: foundUser.userId,
-                            email: foundUser.email,
-                            fullName: foundUser.fullName,
-                        };
-                        var token = jwt.sign(payload, SECRET);
-
-                        return res.status(200).json({"acccessToken": token});
-                    } else {
-                        return res.status(403).json({"message": "access denied"});
-                    }
-                });
-            } else {
-                return res.status(403).json({"message": "access denied"});
-            }
-        }).catch(err => {
-            return res.status(500).json(err);
-        });
-
-    }));
+}));
 
 
 
-    router.get('/profile', auth, ((req, res) => {
+router.get('/api/v1/profile', auth, ((req, res) => {
 
-        Profile.findOne({
-            userId: req.user.userId || "123",
-        }).then((pref) => {
+    Profile.findOne({
+        userId: req.user.userId || "123",
+    }).then((pref) => {
 
-            if (pref) {
-                return res.status(200).json(pref);
-            }
-            return res.status(200).json({});
+        if (pref) {
+            return res.status(200).json(pref);
+        }
+        return res.status(200).json({});
 
 
-        }).catch(err => {
-            res.status(500).json({message: "error", err: err});
+    }).catch(err => {
+        res.status(500).json({message: "error", err: err});
 
-        });
-    }));
+    });
+}));
 
-router.put('/profile', auth, ((req, res) => {
+router.put('/api/v1/profile', auth, ((req, res) => {
 
 
     if (!req.body.skills) {
@@ -220,6 +221,81 @@ router.put('/profile', auth, ((req, res) => {
 
     });
 }));
+
+
+router.put('/api/v1/job', auth, ((req, res) => {
+
+
+    if (!req.body.skills) {
+        return res.status(400).json({"message": "missing skills"});
+    }
+
+    if (!req.body.universe_permits) {
+        return res.status(400).json({"message": "missing permits"});
+    }
+
+
+    if (req.body.over_time === undefined) {
+        return res.status(400).json({"message": "missing over_time"});
+    }
+
+
+    if (req.body.will_reloacate  === undefined) {
+        return res.status(400).json({"message": "missing will_reloacate"});
+    }
+
+
+    if (!req.body.education) {
+        return res.status(400).json({"message": "missing education"});
+    }
+
+    Profile.findOne({
+        userId: req.user.userId,
+    }).then((pref) => {
+
+        if (!pref) {
+            pref = new Profile({});
+            pref.userId = req.user.userId || "123";
+        }
+
+        pref.universe_permits = req.body.universe_permits;
+        pref.willing_to_do_overtime = req.body.over_time;
+        pref.willing_to_relocate_to_other_universe = req.body.will_reloacate;
+        pref.education_level = req.body.education;
+        pref.skills = req.body.skills;
+
+        return pref.save();
+
+    })
+        .then(pref => {
+            return res.status(200).json({message: "success"});
+        })
+        .catch(err => {
+            res.status(500).json({message: "error", err: err});
+
+        });
+}));
+
+
+router.get('/api/v1/jobs', ((req, res) => {
+
+    let mongooseQuery = Job.find({}).sort("-date");
+
+    mongooseQuery.exec().then((results) => {
+        let jobs = [];
+        results.forEach((result) => {
+            jobs.push(result);
+        });
+
+        return jobs;
+    }).then((jobs => {
+        res.status(200).json(jobs);
+    })).catch(err => {
+        return res.status(500).json(err);
+    });
+
+}));
+
 
 
         /*
