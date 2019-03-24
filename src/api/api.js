@@ -12,8 +12,6 @@ const Account = source("./src/models/Accounts");
 const Profile = source("./src/models/Profile");
 const Job = source("./src/models/JobPosting");
 
-
-
 const SECRET = "44a0a45f31cf8122651e28710a43530e";
 
 const express = require("express");
@@ -147,8 +145,6 @@ router.post("/oauth/token", ((req, res) => {
 
 }));
 
-
-
 router.get('/api/v1/profile', auth, ((req, res) => {
 
     Profile.findOne({
@@ -205,7 +201,7 @@ router.put('/api/v1/profile', auth, ((req, res) => {
     }
 
 
-    if (!req.body.education) {
+    if (req.body.education !== undefined) {
         return res.status(400).json({"message": "missing education"});
     }
 
@@ -238,15 +234,14 @@ router.put('/api/v1/profile', auth, ((req, res) => {
     });
 }));
 
-
-router.put('/api/v1/job', auth, ((req, res) => {
+router.post('/api/v1/jobs', ((req, res) => {
 
 
     if (!req.body.description_en) {
         return res.status(400).json({"message": "missing description_en"});
     }
 
-    if (!req.body.salary) {
+    if (req.body.salary !== undefined) {
         return res.status(400).json({"message": "missing salary"});
     }
 
@@ -254,11 +249,11 @@ router.put('/api/v1/job', auth, ((req, res) => {
         return res.status(400).json({"message": "missing location"});
     }
 
-    if (!req.body.work_universe) {
+    if (req.body.work_universe !== undefined) {
         return res.status(400).json({"message": "missing work_universe"});
     }
 
-    if (!req.body.education) {
+    if (req.body.education !== undefined) {
         return res.status(400).json({"message": "missing education"});
     }
 
@@ -287,7 +282,6 @@ router.put('/api/v1/job', auth, ((req, res) => {
             return res.status(500).json({message: "error", error: err});
         });
 }));
-
 
 router.get('/api/v1/jobs', ((req, res) => {
 
@@ -318,90 +312,50 @@ router.get('/api/v1/jobs', ((req, res) => {
 
 }));
 
+router.delete('/api/v1/jobs/:jobId', ((req, res) => {
 
+    Job.findOne({id: req.params.jobId}).then((job) => {
 
-        /*
-        router.get("/articles", ((req, res) => {
+        if (!job) {
+            return res.status(404).json({"message": "Job not found"});
+        } else {
 
-            let mongooseQuery = Article.find({}).sort("-date");
+            Job.findOneAndDelete({id: req.params.jobId}).then((foundJob) => {
 
-            mongooseQuery.exec().then((results) => {
-                let articles = [];
-                results.forEach((result) => {
-                    articles.push( {
-                        id: result.id,
-                        title: result.title,
-                        subtitle: result.subtitle,
-                        leadParagraph: result.leadParagraph,
-                        imageUrl: result.imageUrl,
-                        body: result.body,
-                        author: result.author,
-                        userId: result.userId,
-                        date: result.date,
-                        category: result.category,
-                    });
-                });
-
-                return articles;
-            }).then((articles => {
-                res.status(200).json(articles);
-            })).catch(err => {
-                return res.status(500).json(err);
-            });
-
-        }));
-
-        router.post("/articles", (req, res) => {
-
-            if(!req.headers.authorization) {
-                return res.status(403).json({"message" : "missing token"});
-            }
-
-            let token = req.headers.authorization;
-
-            //Remove Bearer from string
-            token = token.slice(7, token.length);
-
-            jwt.verify(token, SECRET, (err, decoded) => {
-                if (err) {
-                    return res.status(403).json({"message" : "invalid token"});
-                }
-                else {
-                    //check article
-                    if (!req.body.body || !req.body.title || !req.body.subtitle || !req.body.leadParagraph)
-                    {
-                        return res.status(400).json({"message" : "invalid article"});
-                    }
-
-                    var uuid = uuidv4();
-
-                    uuid = uuid.replace(/-/g, "").slice(0,16);
-
-                    let article = new Article({
-                        id: uuid,
-                        userId : decoded.userId,
-                        author : decoded.fullName,
-                        title : req.body.title,
-                        subtitle : req.body.subtitle,
-                        leadParagraph : req.body.leadParagraph,
-                        imageUrl : req.body.imageUrl,
-                        body : req.body.body,
-                        category : req.body.category
-                    });
-
-                    article.save().then(article => {
-                        //return unique id here
-                        res.status(201).json({"message": "Success", id: article.id});
-                    }).catch(err => {
-                        res.status(500).json({"message": err});
-                    });
+                if (foundJob) {
+                    return res.status(200).json({"message": "Job succesfully deleted."});
                 }
             });
+        }
+    }).catch(err => {
+        return res.status(500).json(err);
+    });
+}));
 
-        });
-*/
+router.get('/api/v1/jobs/:jobId', ((req, res) => {
 
+    Job.findOne({id: req.params.jobId}).then((job) => {
 
+        if (!job) {
+            return res.status(404).json({"message": "Job not found"});
+        } else {
+            res.status(200).json(
+            {
+                id: job.id,
+                description_en: job.description_en,
+                description_fr: job.description_fr,
+                salary: job.salary,
+                location: job.location,
+                work_universe: job.work_universe,
+                required_skills: job.required_skill,
+                date: job.date_posted,
+                education: job.education_level
+            });
+        }
+    }).catch(err => {
+        return res.status(500).json(err);
+    });
+}));
 
 module.exports = router;
 
