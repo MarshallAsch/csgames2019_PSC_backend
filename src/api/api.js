@@ -127,6 +127,7 @@ router.post("/oauth/token", ((req, res) => {
 
                 if (passMatch) {
                     var payload = {
+                        exp: Math.floor(Date.now() / 1000) + (60 * 60),
                         userId: foundUser.userId,
                         email: foundUser.email,
                     };
