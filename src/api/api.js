@@ -129,11 +129,10 @@ router.post("/oauth/token", ((req, res) => {
                     var payload = {
                         userId: foundUser.userId,
                         email: foundUser.email,
-                        fullName: foundUser.fullName,
                     };
                     var token = jwt.sign(payload, SECRET);
 
-                    return res.status(200).json({"acccessToken": token});
+                    return res.status(200).json({"access_token": token});
                 } else {
                     return res.status(403).json({"message": "access denied"});
                 }
@@ -156,9 +155,25 @@ router.get('/api/v1/profile', auth, ((req, res) => {
     }).then((pref) => {
 
         if (pref) {
-            return res.status(200).json(pref);
+            return res.status(200).json({
+                first_name: req.user.first_name,
+                last_name: req.user.last_name,
+                permits: pref.universe_permits,
+                overtime: pref.willing_to_do_overtime,
+                relocate: pref.willing_to_relocate_to_other_universe,
+                education: pref.education_level,
+                skills: pref.skills
+            });
         }
-        return res.status(200).json({});
+        return res.status(200).json({
+            first_name: req.user.first_name,
+            last_name: req.user.last_name,
+            permits: null,
+            overtime: null,
+            relocate: null,
+            education: 0,
+            skills: []
+        });
 
 
     }).catch(err => {
@@ -174,17 +189,17 @@ router.put('/api/v1/profile', auth, ((req, res) => {
         return res.status(400).json({"message": "missing skills"});
     }
 
-    if (!req.body.universe_permits) {
+    if (!req.body.permits) {
         return res.status(400).json({"message": "missing permits"});
     }
 
 
-    if (req.body.over_time === undefined) {
+    if (req.body.overtime === undefined) {
         return res.status(400).json({"message": "missing over_time"});
     }
 
 
-    if (req.body.will_reloacate  === undefined) {
+    if (req.body.relocate  === undefined) {
         return res.status(400).json({"message": "missing will_reloacate"});
     }
 
@@ -204,9 +219,9 @@ router.put('/api/v1/profile', auth, ((req, res) => {
             pref.userId = req.user.userId || "123";
         }
 
-        pref.universe_permits = req.body.universe_permits;
-        pref.willing_to_do_overtime = req.body.over_time;
-        pref.willing_to_relocate_to_other_universe = req.body.will_reloacate;
+        pref.universe_permits = req.body.permits;
+        pref.willing_to_do_overtime = req.body.overtime;
+        pref.willing_to_relocate_to_other_universe = req.body.relocate;
         pref.education_level = req.body.education;
         pref.skills = req.body.skills;
 
@@ -226,53 +241,49 @@ router.put('/api/v1/profile', auth, ((req, res) => {
 router.put('/api/v1/job', auth, ((req, res) => {
 
 
-    if (!req.body.skills) {
-        return res.status(400).json({"message": "missing skills"});
+    if (!req.body.description_en) {
+        return res.status(400).json({"message": "missing description_en"});
     }
 
-    if (!req.body.universe_permits) {
-        return res.status(400).json({"message": "missing permits"});
+    if (!req.body.salary) {
+        return res.status(400).json({"message": "missing salary"});
     }
 
-
-    if (req.body.over_time === undefined) {
-        return res.status(400).json({"message": "missing over_time"});
+    if (!req.body.location) {
+        return res.status(400).json({"message": "missing location"});
     }
 
-
-    if (req.body.will_reloacate  === undefined) {
-        return res.status(400).json({"message": "missing will_reloacate"});
+    if (!req.body.work_universe) {
+        return res.status(400).json({"message": "missing work_universe"});
     }
-
 
     if (!req.body.education) {
         return res.status(400).json({"message": "missing education"});
     }
 
-    Profile.findOne({
-        userId: req.user.userId,
-    }).then((pref) => {
+    if (!req.body.required_skills) {
+        return res.status(400).json({"message": "missing required_skills"});
+    }
 
-        if (!pref) {
-            pref = new Profile({});
-            pref.userId = req.user.userId || "123";
-        }
+    var job = new Job(
+        {
+            id: uuidv4(),
+            description_en: req.body.description_en,
+            description_fr: req.body.description_fr,
+            salary: req.body.salary,
+            location: req.body.location,
+            work_universe: req.body.work_universe,
+            required_skill: req.body.required_skills,
+            education_level: req.body.education
+        });
 
-        pref.universe_permits = req.body.universe_permits;
-        pref.willing_to_do_overtime = req.body.over_time;
-        pref.willing_to_relocate_to_other_universe = req.body.will_reloacate;
-        pref.education_level = req.body.education;
-        pref.skills = req.body.skills;
+    job.save()
+        .then(saved => {
+            return res.status(201).json({message: "success"});
 
-        return pref.save();
-
-    })
-        .then(pref => {
-            return res.status(200).json({message: "success"});
         })
         .catch(err => {
-            res.status(500).json({message: "error", err: err});
-
+            return res.status(500).json({message: "error", error: err});
         });
 }));
 
@@ -284,7 +295,17 @@ router.get('/api/v1/jobs', ((req, res) => {
     mongooseQuery.exec().then((results) => {
         let jobs = [];
         results.forEach((result) => {
-            jobs.push(result);
+            jobs.push({
+                id: result.id,
+                description_en: result.description_en,
+                description_fr: result.description_fr,
+                salary: result.salary,
+                location: result.location,
+                work_universe: result.work_universe,
+                required_skills: result.required_skill,
+                date: result.date_posted,
+                education: result.education_level
+            });
         });
 
         return jobs;
