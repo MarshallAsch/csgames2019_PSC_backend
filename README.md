@@ -1,26 +1,3 @@
-[![Build Status](https://travis-ci.com/Aboisier/cs2019-Black-Perl.svg?token=vuBsBM3yD6PMvt3zwT9s&branch=master)](https://travis-ci.com/Aboisier/cs2019-Black-Perl)
-[![codecov](https://codecov.io/gh/Aboisier/cs2019-Black-Perl/branch/master/graph/badge.svg?token=gzeYOoEUNg)](https://codecov.io/gh/Aboisier/cs2019-Black-Perl)
-
-# Readme
-
-To configure your project, please follow the steps below:
-
-(Quick link to the dashboard: https://cs2019-tse-infra-dashboard.herokuapp.com/#/home)
-
-## Setup your workspace
-
-### Set your environment variables
-
-At the root of your peojct, you will find a `.env.template` file. Rename it to `.env`. Replace the `MONGODB_URI` by the one you will find in the dashboard under the `team` section once you are logged in. It should look something like the snippet below.
-
-```
-MONGODB_URI=your_mongo_uri
-
-
-ARTICLES_API_BASE_URI=https://cs2019-tse-articles-api.herokuapp.com/
-FRONT_END_ORIGIN=*
-PORT=8081
-```
 
 ### Install the dependencies
 
@@ -40,7 +17,7 @@ At the root of your peojct, run the following command
 npm run start-watch
 ```
 
-You should be able to see an awesome website if you navigate to http://localhost:8081. Unfortunately, you will quickly notice the website does not do much. That's where your work start: **you must implement the backend app**.
+You should be able to see an awesome website if you navigate to http://localhost:8080.  That's where your work start: **you must implement the backend app**.
 
 ### Run the rests
 
