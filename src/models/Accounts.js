@@ -8,6 +8,10 @@
 const mongoose = require("mongoose");
 
 const accounts = new mongoose.Schema({
+    userId: {
+        type: String,
+        required: true,
+    },
     // account email
     email: {
         type: String,

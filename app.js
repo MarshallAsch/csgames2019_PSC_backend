@@ -17,7 +17,7 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use('/api', api);
+app.use('/api/v1', api);
 
 app.listen(process.env.PORT || 8080, () => {
     console.log(`Server started, listening on port ${process.env.PORT || 8080}.`);
